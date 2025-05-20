@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Городской Календарь - Интерактивная Платформа Городских Событий</title>
+    
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR-GA4-ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'YOUR-GA4-ID');
+    </script>
+
+    <!-- Matomo Analytics -->
+    <script>
+        var _paq = window._paq = window._paq || [];
+        _paq.push(['trackPageView']);
+        _paq.push(['enableLinkTracking']);
+        (function() {
+            var u="https://YOUR-MATOMO-DOMAIN/";
+            _paq.push(['setTrackerUrl', u+'matomo.php']);
+            _paq.push(['setSiteId', 'YOUR-SITE-ID']);
+            var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+            g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+        })();
+    </script>
+
+    <!-- Yandex.Metrika -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+        m[i].l=1*new Date();
+        for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+        k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+        ym(YOUR-YANDEX-ID, "init", {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true,
+            webvisor:true
+        });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/YOUR-YANDEX-ID" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#818CF8',
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .custom-checkbox {
+            position: relative;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .custom-checkbox.checked {
+            background-color: #4F46E5;
+            border-color: #4F46E5;
+        }
+
+        .custom-checkbox.checked::after {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 2px;
+            width: 6px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+
+<body class="bg-white min-h-screen">
+    <!-- Header Section -->
+    <header class="w-full bg-white shadow-sm fixed top-0 left-0 right-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <span class="text-2xl font-bold text-gray-800">Городской Календарь</span>
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="#events" class="text-gray-600 hover:text-primary transition-colors">События</a>
+                <a href="#categories" class="text-gray-600 hover:text-primary transition-colors">Категории</a>
+                <a href="#calendar" class="text-gray-600 hover:text-primary transition-colors">Календарь</a>
+                <a href="#about" class="text-gray-600 hover:text-primary transition-colors">О Проекте</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <a href="#add-event" class="bg-primary text-white px-5 py-2 !rounded-button font-medium hover:bg-opacity-90 transition-colors whitespace-nowrap">Добавить Событие</a>
+                <button id="theme-toggle" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
+                    <i class="ri-sun-line text-gray-600"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="pt-28 pb-16 relative overflow-hidden w-full gradient-bg">
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="w-full md:w-1/2 lg:w-5/12">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">Откройте Город Заново</h1>
+                <p class="text-lg text-gray-700 mb-8">Исследуйте самые интересные события города, фильтруйте по категориям и создавайте свой уникальный календарь мероприятий.</p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a href="#calendar" class="bg-primary text-white px-8 py-3 !rounded-button font-medium hover:bg-opacity-90 transition-colors text-center whitespace-nowrap">Смотреть Календарь</a>
+                    <a href="#categories" class="bg-white text-gray-800 border border-gray-300 px-8 py-3 !rounded-button font-medium hover:bg-gray-50 transition-colors text-center whitespace-nowrap">Категории Событий</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section id="categories" class="py-20 gradient-bg">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Категории Событий</h2>
+                <p class="text-lg text-gray-700 max-w-3xl mx-auto">Выберите интересующие вас категории мероприятий и создайте свой уникальный календарь.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Category 1 -->
+                <div class="bg-white p-8 rounded-lg shadow-md transition-all duration-300 event-card">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
+                        <i class="ri-music-2-line ri-2x text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Концерты</h3>
+                    <p class="text-gray-600">Музыкальные мероприятия всех жанров и направлений.</p>
+                </div>
+                <!-- Category 2 -->
+                <div class="bg-white p-8 rounded-lg shadow-md transition-all duration-300 event-card">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
+                        <i class="ri-artboard-2-line ri-2x text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Выставки</h3>
+                    <p class="text-gray-600">Художественные и культурные экспозиции.</p>
+                </div>
+                <!-- Category 3 -->
+                <div class="bg-white p-8 rounded-lg shadow-md transition-all duration-300 event-card">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
+                        <i class="ri-restaurant-2-line ri-2x text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Фестивали</h3>
+                    <p class="text-gray-600">Гастрономические и культурные фестивали.</p>
+                </div>
+                <!-- Category 4 -->
+                <div class="bg-white p-8 rounded-lg shadow-md transition-all duration-300 event-card">
+                    <div class="w-14 h-14 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
+                        <i class="ri-group-line ri-2x text-primary"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Спорт</h3>
+                    <p class="text-gray-600">Спортивные мероприятия и соревнования.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Calendar Section -->
+    <section id="calendar" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="p-8">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-6">Календарь Событий</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Calendar Widget -->
+                            <div class="bg-gray-50 p-6 rounded-lg">
+                                <div class="flex justify-between items-center mb-4">
+                                    <button class="text-gray-600 hover:text-primary">
+                                        <i class="ri-arrow-left-s-line ri-xl"></i>
+                                    </button>
+                                    <h4 class="text-lg font-semibold">Март 2024</h4>
+                                    <button class="text-gray-600 hover:text-primary">
+                                        <i class="ri-arrow-right-s-line ri-xl"></i>
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-7 gap-2 text-center">
+                                    <div class="text-sm text-gray-500">Пн</div>
+                                    <div class="text-sm text-gray-500">Вт</div>
+                                    <div class="text-sm text-gray-500">Ср</div>
+                                    <div class="text-sm text-gray-500">Чт</div>
+                                    <div class="text-sm text-gray-500">Пт</div>
+                                    <div class="text-sm text-gray-500">Сб</div>
+                                    <div class="text-sm text-gray-500">Вс</div>
+                                    <!-- Calendar days will be dynamically generated -->
+                                </div>
+                            </div>
+                            <!-- Events List -->
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h5 class="font-semibold">Джазовый Фестиваль</h5>
+                                            <p class="text-sm text-gray-600">15 марта, 19:00</p>
+                                        </div>
+                                        <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">Музыка</span>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <h5 class="font-semibold">Выставка Современного Искусства</h5>
+                                            <p class="text-sm text-gray-600">18 марта, 12:00</p>
+                                        </div>
+                                        <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">Искусство</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Add Event Form -->
+    <section id="add-event" class="py-20 bg-gray-50">
+        <div class="container mx-auto px-6">
+            <div class="max-w-2xl mx-auto">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Добавить Событие</h3>
+                    <form id="event-form" class="space-y-6">
+                        <div>
+                            <label for="event-name" class="block text-sm font-medium text-gray-700 mb-2">Название События</label>
+                            <input type="text" id="event-name" name="event-name" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="event-date" class="block text-sm font-medium text-gray-700 mb-2">Дата и Время</label>
+                            <input type="datetime-local" id="event-date" name="event-date" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" required>
+                        </div>
+                        <div>
+                            <label for="event-category" class="block text-sm font-medium text-gray-700 mb-2">Категория</label>
+                            <select id="event-category" name="event-category" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" required>
+                                <option value="">Выберите категорию</option>
+                                <option value="music">Музыка</option>
+                                <option value="art">Искусство</option>
+                                <option value="sport">Спорт</option>
+                                <option value="food">Еда</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="event-description" class="block text-sm font-medium text-gray-700 mb-2">Описание</label>
+                            <textarea id="event-description" name="event-description" rows="4" class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg" required></textarea>
+                        </div>
+                        <button type="submit" class="w-full bg-primary text-white py-3 !rounded-button font-medium hover:bg-opacity-90 transition-colors">Добавить Событие</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white pt-16 pb-8">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">О Проекте</h4>
+                    <p class="text-gray-400">Интерактивный календарь городских событий, помогающий жителям быть в курсе всех интересных мероприятий.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Категории</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Музыка</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Искусство</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Спорт</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Еда</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Контакты</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Обратная связь</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Партнерство</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Реклама</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Подписка</h4>
+                    <p class="text-gray-400 mb-4">Получайте уведомления о новых событиях</p>
+                    <form class="flex gap-2">
+                        <input type="email" placeholder="Ваш email" class="px-4 py-2 rounded-lg bg-gray-800 text-white flex-1">
+                        <button type="submit" class="bg-primary px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">Подписаться</button>
+                    </form>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8">
+                <p class="text-gray-400 text-center">&copy; 2024 Городской Календарь. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark');
+                const icon = this.querySelector('i');
+                if (document.body.classList.contains('dark')) {
+                    icon.classList.remove('ri-sun-line');
+                    icon.classList.add('ri-moon-line');
+                } else {
+                    icon.classList.remove('ri-moon-line');
+                    icon.classList.add('ri-sun-line');
+                }
+            });
+
+            // Form submission
+            const eventForm = document.getElementById('event-form');
+            eventForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Here you would typically handle the form submission
+                alert('Событие успешно добавлено!');
+                eventForm.reset();
+            });
+        });
+    </script>
+</body>
+
+</html> 
